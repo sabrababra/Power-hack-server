@@ -38,12 +38,6 @@ async function run() {
         const usersCollection = client.db('powerHack').collection('users');
         const billingCollection = client.db('powerHack').collection('billing');
 
-        app.get('/users', async (req, res) => {
-            const query = {};
-            const result = await usersCollection.find(query).toArray();
-            res.send(result)
-        });
-
         // verify user by email
         app.post('/api/user', verifyJWT, async (req, res) => {
             const email = req.body.email
@@ -91,6 +85,34 @@ async function run() {
             const query = {};
             const billing = await billingCollection.find(query).toArray();
             res.send(billing);
+        })
+
+        // add billing data
+        app.post('/api/add-billing', verifyJWT, async (req, res) => {
+            const data = req.body;
+            const result = await billingCollection.insertOne(data);
+            res.send(result);
+        })
+
+        // update billing
+        app.put('/api/update-billing/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const body = req.body;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: body
+            }
+            const result = await billingCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        });
+
+        // delete billing 
+        app.delete('/api/delete-billing/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await billingCollection.deleteOne(filter);
+            res.send(result);
         })
 
 
