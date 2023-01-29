@@ -36,6 +36,7 @@ function verifyJWT(req, res, next) {
 async function run() {
     try {
         const usersCollection = client.db('powerHack').collection('users');
+        const billingCollection = client.db('powerHack').collection('billing');
 
         app.get('/users', async (req, res) => {
             const query = {};
@@ -44,12 +45,12 @@ async function run() {
         });
 
         // verify user by email
-        app.get('/api/user/:email', verifyJWT, async (req, res) => {
-            const email = req.params.email
+        app.post('/api/user', verifyJWT, async (req, res) => {
+            const email = req.body.email
             const query = { email: email }
             const user = await usersCollection.findOne(query)
             if (user?.email) {
-                res.send({ verify: true, email: user?.email })
+                return res.send({ verify: true, email: user?.email })
             }
             res.send({ verify: false })
         })
@@ -83,6 +84,13 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc, options)
 
             res.send(result);
+        })
+
+        // get billing data
+        app.get('/api/billing-list', verifyJWT, async (req, res) => {
+            const query = {};
+            const billing = await billingCollection.find(query).toArray();
+            res.send(billing);
         })
 
 
