@@ -43,7 +43,7 @@ async function run() {
             res.send(result)
         });
 
-        // get user by email
+        // verify user by email
         app.get('/api/user/:email', verifyJWT, async (req, res) => {
             const email = req.params.email
             const query = { email: email }
