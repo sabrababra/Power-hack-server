@@ -82,9 +82,12 @@ async function run() {
 
         // get billing data
         app.get('/api/billing-list', verifyJWT, async (req, res) => {
-            const query = {};
-            const billing = await billingCollection.find(query).toArray();
-            res.send(billing);
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            const query={};
+            const info=await billingCollection.find(query).sort({ _id: -1 }).skip(page*size).limit(size).toArray();
+            const count = await billingCollection.estimatedDocumentCount();
+            res.send({count,info});
         })
 
         // add billing data
@@ -92,6 +95,8 @@ async function run() {
             const data = req.body;
             const result = await billingCollection.insertOne(data);
             res.send(result);
+
+            
         })
 
         // update billing
